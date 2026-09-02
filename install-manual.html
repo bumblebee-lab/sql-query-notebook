@@ -1,0 +1,1456 @@
+<title>SQL Query Notebook Installation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================================
+   Installation manual — design tokens
+   Light palette lives on bare :root so the un-stamped (system) state resolves.
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  --paper:      #FBFBFD;
+  --card:       #FFFFFF;
+  --sunk:       #F3F4F9;
+  --rule:       #E3E5EF;
+  --rule-soft:  #EEEFF6;
+
+  --ink:        #14161F;
+  --ink-2:      #4A4F60;
+  --ink-3:      #858B9E;
+
+  --accent:     #5B3DF5;
+  --accent-ink: #4A2FD6;
+  --accent-bg:  #EFECFF;
+
+  --done:       #15803D;
+  --done-bg:    #E4F7EA;
+  --warn:       #A65B06;
+  --warn-bg:    #FDF2DC;
+  --stop:       #C0392B;
+  --stop-bg:    #FCEBE9;
+
+  --code-bg:    #F6F6FB;
+  --code-ink:   #262B3B;
+
+  --shadow:     0 1px 2px rgba(20,22,31,.05), 0 8px 24px rgba(20,22,31,.05);
+  --shadow-sm:  0 1px 2px rgba(20,22,31,.06);
+
+  --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:      #0B0D14;
+    --card:       #13161F;
+    --sunk:       #1A1E29;
+    --rule:       #262B39;
+    --rule-soft:  #1E2230;
+
+    --ink:        #EEF0F6;
+    --ink-2:      #A7AEC1;
+    --ink-3:      #6E7689;
+
+    --accent:     #9B7CFA;
+    --accent-ink: #C3B0FD;
+    --accent-bg:  #221B44;
+
+    --done:       #5BD98A;
+    --done-bg:    #102C1B;
+    --warn:       #F0B453;
+    --warn-bg:    #33260C;
+    --stop:       #F58A7E;
+    --stop-bg:    #331512;
+
+    --code-bg:    #0F1219;
+    --code-ink:   #D3D8E6;
+
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    --shadow-sm:  0 1px 2px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:      #0B0D14;
+  --card:       #13161F;
+  --sunk:       #1A1E29;
+  --rule:       #262B39;
+  --rule-soft:  #1E2230;
+  --ink:        #EEF0F6;
+  --ink-2:      #A7AEC1;
+  --ink-3:      #6E7689;
+  --accent:     #9B7CFA;
+  --accent-ink: #C3B0FD;
+  --accent-bg:  #221B44;
+  --done:       #5BD98A;
+  --done-bg:    #102C1B;
+  --warn:       #F0B453;
+  --warn-bg:    #33260C;
+  --stop:       #F58A7E;
+  --stop-bg:    #331512;
+  --code-bg:    #0F1219;
+  --code-ink:   #D3D8E6;
+  --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.45);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.018em; text-wrap: balance; }
+p { margin: 0 0 .8em; }
+p:last-child { margin-bottom: 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+ol, ul { margin: 0 0 .9em; padding-left: 1.3em; }
+li { margin-bottom: .38em; }
+li:last-child { margin-bottom: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+code, .mono { font-family: var(--mono); font-size: .88em; }
+code {
+  background: var(--code-bg); color: var(--code-ink);
+  border: 1px solid var(--rule-soft);
+  padding: .1em .38em; border-radius: 5px;
+}
+
+/* ---------------------------------------------------------------- masthead */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--card);
+}
+.masthead-in {
+  max-width: 1180px; margin: 0 auto; padding: 30px 26px 26px;
+  display: flex; gap: 26px; align-items: flex-start; flex-wrap: wrap;
+}
+.eyebrow {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.masthead h1 { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.14; }
+.lede { color: var(--ink-2); max-width: 60ch; margin-top: 10px; font-size: 16px; }
+
+.facts {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+  border-radius: 10px; overflow: hidden; margin-left: auto; min-width: 400px;
+}
+.fact { background: var(--card); padding: 11px 14px; }
+.fact dt {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px;
+}
+.fact dd { margin: 0; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.fact dd small { font-size: 12px; font-weight: 400; color: var(--ink-3); }
+
+/* ------------------------------------------------------------------ layout */
+.wrap {
+  max-width: 1180px; margin: 0 auto; padding: 26px;
+  display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 34px;
+  align-items: start;
+}
+
+/* --------------------------------------------------------------- side rail */
+.rail { position: sticky; top: 20px; }
+.rail-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.rail-head span {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.rail-count { font-family: var(--mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.bar { height: 4px; background: var(--sunk); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+.bar-fill { height: 100%; width: 0; background: var(--done); border-radius: 3px; transition: width 260ms cubic-bezier(.4,0,.2,1); }
+
+.rail-group {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding: 13px 0 5px 26px;
+}
+.rail-group:first-of-type { padding-top: 2px; }
+
+.rail-link {
+  display: flex; gap: 9px; align-items: baseline; width: 100%;
+  padding: 5px 8px 5px 0; border: 0; background: none; cursor: pointer;
+  text-align: left; color: var(--ink-2); font: inherit; font-size: 13.5px;
+  border-radius: 6px;
+}
+.rail-link:hover { color: var(--ink); background: var(--sunk); }
+.rail-link .n {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  width: 18px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums;
+}
+.rail-link.done { color: var(--ink-3); }
+.rail-link.done .n { color: var(--done); }
+.rail-link.done .t { text-decoration: line-through; text-decoration-color: var(--rule); }
+.rail-link.here { color: var(--accent-ink); font-weight: 600; }
+.rail-link.here .n { color: var(--accent); }
+
+.rail-reset {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule-soft);
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  background: none; border-left: 0; border-right: 0; border-bottom: 0;
+  cursor: pointer; padding-left: 0;
+}
+.rail-reset:hover { color: var(--stop); }
+
+/* ------------------------------------------------------------------- steps */
+.intro {
+  background: var(--card); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 20px 22px; margin-bottom: 26px;
+  box-shadow: var(--shadow-sm);
+}
+.intro h2 { font-size: 17px; margin-bottom: 9px; }
+
+.files {
+  display: grid; gap: 8px; margin: 14px 0 4px;
+}
+.file-row {
+  display: grid; grid-template-columns: 150px 1fr auto; gap: 14px;
+  align-items: baseline; padding: 9px 12px;
+  background: var(--sunk); border-radius: 8px; font-size: 13.5px;
+}
+.file-row b { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.file-row .sz { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.phase {
+  display: flex; align-items: center; gap: 14px;
+  margin: 34px 0 16px;
+}
+.phase:first-of-type { margin-top: 0; }
+.phase-label {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3);
+  white-space: nowrap;
+}
+.phase-rule { flex: 1; height: 1px; background: var(--rule); }
+
+.step {
+  background: var(--card); border: 1px solid var(--rule);
+  border-radius: 12px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+  scroll-margin-top: 20px;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.step.done { border-color: var(--rule-soft); background: var(--paper); }
+.step.done .step-body { opacity: .58; }
+
+.step-head {
+  display: grid; grid-template-columns: 42px 1fr auto; gap: 14px;
+  align-items: start; padding: 16px 18px 12px;
+}
+.marker {
+  font-family: var(--mono); font-size: 19px; font-weight: 700;
+  color: var(--accent); line-height: 1.15; font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+.step.done .marker { color: var(--done); }
+.step-title { font-size: 17.5px; line-height: 1.28; }
+.step-meta {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  margin-top: 4px; letter-spacing: .03em;
+}
+
+.tick {
+  display: flex; align-items: center; gap: 7px; cursor: pointer;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3); user-select: none;
+  padding: 5px 9px; border-radius: 7px; border: 1px solid var(--rule);
+  background: var(--card); white-space: nowrap;
+}
+.tick:hover { border-color: var(--done); color: var(--done); }
+.tick input { width: 15px; height: 15px; accent-color: var(--done); margin: 0; cursor: pointer; }
+.step.done .tick { color: var(--done); border-color: var(--done); background: var(--done-bg); }
+
+.step-body { padding: 0 18px 18px 74px; }
+@media (max-width: 620px) { .step-body { padding-left: 18px; } }
+
+/* ------------------------------------------------------------- step pieces */
+.do { counter-reset: doitem; list-style: none; padding: 0; margin: 0 0 14px; }
+.do > li {
+  position: relative; padding-left: 27px; margin-bottom: .5em;
+}
+.do > li::before {
+  counter-increment: doitem; content: counter(doitem) ".";
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono); font-size: 12px; color: var(--ink-3);
+}
+
+kbd {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  background: var(--sunk); border: 1px solid var(--rule);
+  border-bottom-width: 2px; border-radius: 5px;
+  padding: 1px 5px; color: var(--ink-2); white-space: nowrap;
+}
+
+.copy {
+  display: inline-flex; align-items: center; gap: 0;
+  border: 1px solid var(--rule); border-radius: 7px; overflow: hidden;
+  background: var(--code-bg); margin: 2px 0; vertical-align: middle;
+  max-width: 100%;
+}
+.copy .val {
+  font-family: var(--mono); font-size: 13px; color: var(--code-ink);
+  padding: 5px 11px; white-space: nowrap; overflow-x: auto;
+}
+.copy button {
+  border: 0; border-left: 1px solid var(--rule); background: var(--sunk);
+  color: var(--ink-2); font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 6px 10px; cursor: pointer; align-self: stretch; white-space: nowrap;
+}
+.copy button:hover { background: var(--accent-bg); color: var(--accent-ink); }
+.copy button.ok { background: var(--done-bg); color: var(--done); }
+
+.note {
+  display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+  padding: 11px 13px; border-radius: 9px; font-size: 14px;
+  margin: 12px 0; line-height: 1.55;
+}
+.note .ico { font-family: var(--mono); font-weight: 700; font-size: 13px; line-height: 1.5; }
+.note.check { background: var(--done-bg); color: var(--done); }
+.note.warn  { background: var(--warn-bg); color: var(--warn); }
+.note.stop  { background: var(--stop-bg); color: var(--stop); }
+.note strong { font-weight: 600; }
+.note.check strong, .note.warn strong, .note.stop strong { color: inherit; }
+
+details {
+  border: 1px solid var(--rule); border-radius: 9px;
+  margin: 12px 0; background: var(--card); overflow: hidden;
+}
+summary {
+  cursor: pointer; padding: 9px 13px; font-size: 13.5px; font-weight: 500;
+  color: var(--ink-2); list-style: none; display: flex; align-items: center; gap: 8px;
+}
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: '+'; font-family: var(--mono); font-size: 14px; color: var(--ink-3);
+  width: 12px; flex-shrink: 0;
+}
+details[open] > summary::before { content: '\2212'; }
+summary:hover { color: var(--ink); background: var(--sunk); }
+.details-body { padding: 2px 13px 13px 33px; font-size: 14px; color: var(--ink-2); }
+.details-body p:last-child { margin-bottom: 0; }
+
+.fig {
+  margin: 16px 0; padding: 16px; background: var(--sunk);
+  border-radius: 10px; border: 1px solid var(--rule-soft);
+}
+.fig svg { display: block; width: 100%; height: auto; }
+.fig figcaption {
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  margin-top: 11px; letter-spacing: .03em; text-align: center;
+}
+
+table.t {
+  width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0;
+}
+table.t th, table.t td {
+  text-align: left; padding: 8px 11px; border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top;
+}
+table.t th {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  border-bottom-color: var(--rule);
+}
+table.t tr:last-child td { border-bottom: 0; }
+.scroller { overflow-x: auto; }
+
+.setting {
+  display: grid; grid-template-columns: minmax(130px, auto) 1fr; gap: 2px 16px;
+  border: 1px solid var(--rule); border-radius: 9px; padding: 13px 15px;
+  margin: 12px 0; background: var(--code-bg); font-size: 14px;
+}
+.setting dt { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); padding: 3px 0; }
+.setting dd { margin: 0; font-weight: 600; padding: 3px 0; }
+.setting dd em { font-style: normal; font-weight: 400; color: var(--ink-3); font-size: 13px; }
+
+pre.log {
+  background: var(--code-bg); border: 1px solid var(--rule-soft);
+  border-radius: 9px; padding: 13px 15px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.55;
+  color: var(--code-ink); margin: 12px 0;
+}
+
+/* -------------------------------------------------------------- final card */
+.final {
+  border: 1px solid var(--accent); background: var(--accent-bg);
+  border-radius: 12px; padding: 22px; margin-top: 30px;
+}
+.final h2 { font-size: 19px; margin-bottom: 10px; color: var(--accent-ink); }
+.final .checklist { list-style: none; padding: 0; margin: 14px 0 0; }
+.final .checklist li {
+  display: grid; grid-template-columns: 20px 1fr; gap: 9px;
+  font-size: 14.5px; margin-bottom: .5em; color: var(--ink-2);
+}
+.final .checklist .bx { font-family: var(--mono); color: var(--accent); }
+
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(14px);
+  background: var(--ink); color: var(--paper);
+  padding: 9px 17px; border-radius: 9px; font-size: 13.5px;
+  opacity: 0; pointer-events: none; transition: opacity 180ms, transform 180ms;
+  z-index: 50; box-shadow: var(--shadow);
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.themer {
+  position: fixed; right: 18px; bottom: 18px; z-index: 40;
+  width: 38px; height: 38px; border-radius: 10px;
+  border: 1px solid var(--rule); background: var(--card); color: var(--ink-2);
+  cursor: pointer; line-height: 0; box-shadow: var(--shadow-sm);
+  display: grid; place-items: center;
+}
+.themer:hover { color: var(--ink); border-color: var(--ink-3); }
+
+footer {
+  max-width: 1180px; margin: 0 auto; padding: 30px 26px 60px;
+  border-top: 1px solid var(--rule); margin-top: 34px;
+  font-size: 13px; color: var(--ink-3);
+}
+
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: 1fr; gap: 20px; padding: 18px; }
+  .rail {
+    position: static; border: 1px solid var(--rule); border-radius: 12px;
+    padding: 14px 16px; background: var(--card);
+  }
+  .masthead-in { padding: 22px 18px; }
+  .facts { margin-left: 0; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .file-row { grid-template-columns: 1fr; gap: 3px; }
+  body { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+@media print {
+  .rail, .themer, .tick, .toast { display: none !important; }
+  .wrap { grid-template-columns: 1fr; }
+  .step { break-inside: avoid; box-shadow: none; }
+  details { break-inside: avoid; }
+  details > summary { font-weight: 600; }
+  .details-body { display: block !important; }
+  body { font-size: 11pt; }
+}
+</style>
+
+<header class="masthead">
+  <div class="masthead-in">
+    <div>
+      <div class="eyebrow">Installation Manual · v1.0.0</div>
+      <h1>SQL Query Notebook</h1>
+      <p class="lede">
+        Install the application on your own Google account. Twelve steps, no coding,
+        no server, no cost. You paste two files, run one function, and press Deploy.
+      </p>
+    </div>
+    <dl class="facts">
+      <div class="fact"><dt>Steps</dt><dd>12<small> +1</small></dd></div>
+      <div class="fact"><dt>Time</dt><dd>25<small> min</small></dd></div>
+      <div class="fact"><dt>Files to paste</dt><dd>2</dd></div>
+      <div class="fact"><dt>Cost</dt><dd>0<small> PKR</small></dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============================================================ rail -->
+  <nav class="rail" aria-label="Steps">
+    <div class="rail-head">
+      <span>Progress</span>
+      <span class="rail-count" id="railCount">0 / 12</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <div id="railLinks"></div>
+    <button class="rail-reset" id="btnReset">reset progress</button>
+  </nav>
+
+  <!-- ============================================================ main -->
+  <main>
+
+    <section class="intro">
+      <h2>Before you start</h2>
+      <p>
+        You need a Google account — a work (Google Workspace) account is strongly
+        recommended — and these files, which are in the folder
+        <code>SQL-Query-Notebook-2-FILES</code>.
+      </p>
+      <div class="files">
+        <div class="file-row"><b>Code.gs</b><span>The entire backend. All 16 modules in one file.</span><span class="sz">5,649 lines</span></div>
+        <div class="file-row"><b>Index.html</b><span>The entire front end. All the styling and screens.</span><span class="sz">5,072 lines</span></div>
+        <div class="file-row"><b>appsscript.json</b><span>The manifest. Apps Script creates this for you — you only replace its contents.</span><span class="sz">544 bytes</span></div>
+      </div>
+      <div class="note check">
+        <span class="ico">✓</span>
+        <span>Nothing here is destructive. If you get something wrong you can delete the
+        spreadsheet and start again — no other data is touched.</span>
+      </div>
+    </section>
+
+    <!-- ======================================================= PHASE A -->
+    <div class="phase">
+      <span class="phase-label">Phase A · Prepare</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- STEP 1 ------------------------------------------------------- -->
+    <article class="step" id="step-1" data-step="1">
+      <div class="step-head">
+        <div class="marker">01</div>
+        <div>
+          <h2 class="step-title">Create the Google Sheet</h2>
+          <div class="step-meta">≈ 1 minute · sheets.google.com</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="1"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>This spreadsheet becomes your database. The application creates all 14 tabs
+        inside it later — you only create the empty file.</p>
+        <ol class="do">
+          <li>Go to <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> and click <strong>Blank spreadsheet</strong>.</li>
+          <li>Click the title <em>Untitled spreadsheet</em> at the top left.</li>
+          <li>Type this name exactly, then press Enter:</li>
+        </ol>
+        <span class="copy"><span class="val">SQL Query Notebook DB</span><button data-copy="SQL Query Notebook DB">Copy</button></span>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> an empty spreadsheet named
+          <em>SQL Query Notebook DB</em>, with one tab called <code>Sheet1</code>.</span>
+        </div>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>Do <strong>not</strong> create any tabs yourself. Step 6 builds all 14
+          with the correct column headers. Leave <code>Sheet1</code> alone — setup deletes it.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- STEP 2 ------------------------------------------------------- -->
+    <article class="step" id="step-2" data-step="2">
+      <div class="step-head">
+        <div class="marker">02</div>
+        <div>
+          <h2 class="step-title">Open the Apps Script editor</h2>
+          <div class="step-meta">≈ 1 minute · from inside the spreadsheet</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="2"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>Apps Script is Google's built-in code editor. It is free and already part of
+        your account — there is nothing to install.</p>
+        <ol class="do">
+          <li>In the spreadsheet menu bar, click <strong>Extensions → Apps Script</strong>.</li>
+          <li>A new browser tab opens with a file called <code>Code.gs</code> containing an
+          empty <code>myFunction()</code>.</li>
+          <li>Click <em>Untitled project</em> at the top left and rename it:</li>
+        </ol>
+        <span class="copy"><span class="val">SQL Query Notebook</span><button data-copy="SQL Query Notebook">Copy</button></span>
+
+        <figure class="fig">
+          <svg viewBox="0 0 620 250" role="img" aria-label="Diagram of the Apps Script editor: left icon bar, Files panel with a plus button, toolbar with Save, Run, function dropdown, and the Deploy button top right.">
+            <rect x="0" y="0" width="620" height="250" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+            <rect x="0" y="0" width="620" height="34" rx="8" fill="var(--sunk)"/>
+            <rect x="0" y="26" width="620" height="8" fill="var(--sunk)"/>
+            <line x1="0" y1="34" x2="620" y2="34" stroke="var(--rule)"/>
+            <text x="14" y="22" font-family="var(--mono)" font-size="11" fill="var(--ink-2)">SQL Query Notebook</text>
+            <rect x="516" y="8" width="90" height="19" rx="5" fill="var(--accent)"/>
+            <text x="561" y="21" font-family="var(--mono)" font-size="10" fill="#fff" text-anchor="middle">Deploy ▾</text>
+
+            <rect x="0" y="34" width="44" height="216" fill="var(--sunk)"/>
+            <line x1="44" y1="34" x2="44" y2="250" stroke="var(--rule)"/>
+            <text x="22" y="58" font-size="13" fill="var(--accent)" text-anchor="middle">&lt;&gt;</text>
+            <text x="22" y="86" font-size="12" fill="var(--ink-3)" text-anchor="middle">⏱</text>
+            <text x="22" y="114" font-size="12" fill="var(--ink-3)" text-anchor="middle">▤</text>
+            <text x="22" y="142" font-size="12" fill="var(--ink-3)" text-anchor="middle">⚙</text>
+            <text x="60" y="90" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">Triggers (step 12)</text>
+            <text x="60" y="146" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">Project Settings (step 5)</text>
+
+            <rect x="44" y="34" width="166" height="216" fill="var(--card)"/>
+            <line x1="210" y1="34" x2="210" y2="250" stroke="var(--rule)"/>
+            <text x="58" y="56" font-family="var(--mono)" font-size="10" fill="var(--ink-3)">Files</text>
+            <circle cx="192" cy="52" r="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+            <text x="192" y="56" font-size="12" fill="var(--accent)" text-anchor="middle">+</text>
+            <text x="145" y="76" font-family="var(--mono)" font-size="9" fill="var(--accent-ink)" text-anchor="end">click + to add Index.html</text>
+            <line x1="150" y1="70" x2="185" y2="60" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 2"/>
+            <rect x="52" y="86" width="150" height="22" rx="5" fill="var(--accent-bg)"/>
+            <text x="64" y="101" font-family="var(--mono)" font-size="11" fill="var(--accent-ink)">Code.gs</text>
+            <text x="64" y="129" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">Index.html</text>
+            <text x="64" y="151" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">appsscript.json</text>
+            <text x="64" y="176" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">← the only 3 files</text>
+
+            <rect x="210" y="34" width="410" height="34" fill="var(--card)"/>
+            <line x1="210" y1="68" x2="620" y2="68" stroke="var(--rule)"/>
+            <text x="228" y="56" font-size="12" fill="var(--ink-2)">💾</text>
+            <text x="252" y="56" font-size="11" fill="var(--ink-2)">▶ Run</text>
+            <rect x="300" y="42" width="118" height="18" rx="4" fill="var(--sunk)" stroke="var(--rule)"/>
+            <text x="309" y="55" font-family="var(--mono)" font-size="9.5" fill="var(--ink-2)">setupSystem ▾</text>
+            <text x="428" y="55" font-family="var(--mono)" font-size="9" fill="var(--accent-ink)">← pick the function here</text>
+
+            <rect x="224" y="82" width="380" height="150" rx="6" fill="var(--code-bg)" stroke="var(--rule-soft)"/>
+            <text x="240" y="102" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">1  /**</text>
+            <text x="240" y="118" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">2   * SQL QUERY NOTEBOOK — COMPLETE BACKEND</text>
+            <text x="240" y="134" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">3   */</text>
+            <text x="240" y="154" font-family="var(--mono)" font-size="9.5" fill="var(--code-ink)">4  var APP = {</text>
+            <text x="240" y="170" font-family="var(--mono)" font-size="9.5" fill="var(--code-ink)">5    NAME: 'SQL Query Notebook',</text>
+            <text x="240" y="186" font-family="var(--mono)" font-size="9.5" fill="var(--code-ink)">6    VERSION: '1.0.0',</text>
+            <text x="240" y="212" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">…  paste goes here (step 3)</text>
+          </svg>
+          <figcaption>The Apps Script editor. You will use four things: the Files <strong>+</strong> button, the function dropdown, <strong>Run</strong>, and <strong>Deploy</strong>.</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <!-- ======================================================= PHASE B -->
+    <div class="phase">
+      <span class="phase-label">Phase B · Install the code</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- STEP 3 ------------------------------------------------------- -->
+    <article class="step" id="step-3" data-step="3">
+      <div class="step-head">
+        <div class="marker">03</div>
+        <div>
+          <h2 class="step-title">Paste the backend into <span class="mono">Code.gs</span></h2>
+          <div class="step-meta">≈ 3 minutes · 5,649 lines</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="3"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>The editor already has a file called <code>Code.gs</code>. You are replacing its
+        contents — do not create a new file.</p>
+        <ol class="do">
+          <li>Click anywhere inside the code area.</li>
+          <li>Select everything: <kbd>Ctrl</kbd> + <kbd>A</kbd> (Mac: <kbd>⌘</kbd> + <kbd>A</kbd>).</li>
+          <li>Press <kbd>Delete</kbd>. The file should now be completely empty.</li>
+          <li>Open <code>Code.gs</code> from the installation folder in Notepad, VS Code, or any text editor.</li>
+          <li>Select all, copy.</li>
+          <li>Click back into the empty Apps Script editor and paste.</li>
+          <li>Wait for the paste to finish, then press <kbd>Ctrl</kbd> + <kbd>S</kbd> to save.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the file starts with
+          <code>/**</code> and the words <em>SQL QUERY NOTEBOOK — COMPLETE BACKEND</em>,
+          followed by a contents list. No red error marks in the margin.</span>
+        </div>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>It is a large file. Give the paste a few seconds to finish
+          <strong>before</strong> you save — saving mid-paste stores a truncated file.</span>
+        </div>
+        <details>
+          <summary>Finding your way around this file later</summary>
+          <div class="details-body">
+            <p>The file opens with a table of contents, and each of the 16 original
+            modules keeps its own banner. Press <kbd>Ctrl</kbd> + <kbd>F</kbd> and search for
+            a section number to jump straight to it.</p>
+            <div class="scroller">
+              <table class="t">
+                <tr><td class="mono">SECTION 01</td><td>Config — schema, permissions, defaults</td></tr>
+                <tr><td class="mono">SECTION 02</td><td>Utils — spreadsheet access, cache, settings</td></tr>
+                <tr><td class="mono">SECTION 04</td><td>Auth — identity, sessions, permission checks</td></tr>
+                <tr><td class="mono">SECTION 05</td><td>Queries — create, search, filter, dashboard</td></tr>
+                <tr><td class="mono">SECTION 09</td><td>Users — accounts, roles, permission matrix</td></tr>
+                <tr><td class="mono">SECTION 15</td><td>Setup — setupSystem(), seedDemoData()</td></tr>
+                <tr><td class="mono">SECTION 16</td><td>Code — doGet() and all 57 API endpoints</td></tr>
+              </table>
+            </div>
+          </div>
+        </details>
+        <details>
+          <summary>The paste looks cut off, or I see red errors</summary>
+          <div class="details-body">
+            <p>Scroll to the very bottom of the file. The last line should be a closing
+            <code>}</code> of the <code>updateSettings</code> function. If it stops
+            mid-word, the paste was truncated.</p>
+            <p>Fix it: select all, delete, and paste again — this time wait for the editor
+            to stop showing the loading indicator before saving.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- STEP 4 ------------------------------------------------------- -->
+    <article class="step" id="step-4" data-step="4">
+      <div class="step-head">
+        <div class="marker">04</div>
+        <div>
+          <h2 class="step-title">Add <span class="mono">Index.html</span> for the front end</h2>
+          <div class="step-meta">≈ 3 minutes · 5,072 lines</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="4"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>This is a new file, so this time you use the <strong>+</strong> button.</p>
+        <ol class="do">
+          <li>Next to <strong>Files</strong> on the left, click <strong>+</strong>, then choose <strong>HTML</strong>.</li>
+          <li>The editor asks for a name. Type exactly this — <strong>no <code>.html</code></strong>, the editor adds it:</li>
+        </ol>
+        <span class="copy"><span class="val">Index</span><button data-copy="Index">Copy</button></span>
+        <ol class="do" start="3" style="counter-reset: doitem 2; margin-top:14px">
+          <li>Press Enter. The editor creates <code>Index.html</code> with some placeholder HTML.</li>
+          <li>Select all of that placeholder (<kbd>Ctrl</kbd> + <kbd>A</kbd>) and delete it.</li>
+          <li>Open <code>Index.html</code> from the installation folder, select all, copy.</li>
+          <li>Paste into the editor and save with <kbd>Ctrl</kbd> + <kbd>S</kbd>.</li>
+        </ol>
+        <div class="note stop">
+          <span class="ico">✱</span>
+          <span><strong>The name must be exactly <code>Index</code> with a capital I.</strong>
+          The application looks the file up by that name. <code>index</code>, <code>Index.html</code>
+          typed in full, or <code>MyIndex</code> all produce a blank page when you deploy —
+          and the error message will not tell you why.</span>
+        </div>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the Files panel now lists exactly two
+          files — <code>Code.gs</code> and <code>Index.html</code>. That is the whole application.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- STEP 5 ------------------------------------------------------- -->
+    <article class="step" id="step-5" data-step="5">
+      <div class="step-head">
+        <div class="marker">05</div>
+        <div>
+          <h2 class="step-title">Set the manifest</h2>
+          <div class="step-meta">≈ 2 minutes · appsscript.json</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="5"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>The manifest tells Google which permissions the application needs. It is hidden
+        by default, so you switch it on first.</p>
+        <ol class="do">
+          <li>Click <strong>Project Settings</strong> — the gear icon in the far-left icon bar.</li>
+          <li>Tick <strong>“Show 'appsscript.json' manifest file in editor”</strong>.</li>
+          <li>Click <strong>Editor</strong> (the <code>&lt;&gt;</code> icon) to go back. There is now a third file, <code>appsscript.json</code>.</li>
+          <li>Open it, select all, delete.</li>
+          <li>Paste in the contents of <code>appsscript.json</code> from the installation folder.</li>
+          <li>Find the <code>"timeZone"</code> line. If <code>Asia/Karachi</code> is not your timezone, change it.</li>
+          <li>Save with <kbd>Ctrl</kbd> + <kbd>S</kbd>.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the file contains a
+          <code>"oauthScopes"</code> list with six entries. Save produces no error.</span>
+        </div>
+        <details>
+          <summary>What each permission is for</summary>
+          <div class="details-body">
+            <div class="scroller">
+              <table class="t">
+                <tr><th>Permission</th><th>Needed because</th></tr>
+                <tr><td>Spreadsheets</td><td>The database lives in Google Sheets</td></tr>
+                <tr><td>Drive</td><td>Creates the folder tree, <code>.sql</code> files, attachments and backups</td></tr>
+                <tr><td>Send email as you</td><td>Share and update notifications</td></tr>
+                <tr><td>See your email address</td><td>Identifies who is signed in — this is the basis of every permission check</td></tr>
+                <tr><td>Manage scripts</td><td>Installs the hourly session-cleanup job</td></tr>
+                <tr><td>External service</td><td>Fetches the <code>.xlsx</code> copy of your sheet during a backup</td></tr>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ======================================================= PHASE C -->
+    <div class="phase">
+      <span class="phase-label">Phase C · Initialise</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- STEP 6 ------------------------------------------------------- -->
+    <article class="step" id="step-6" data-step="6">
+      <div class="step-head">
+        <div class="marker">06</div>
+        <div>
+          <h2 class="step-title">Run <span class="mono">setupSystem()</span></h2>
+          <div class="step-meta">≈ 1 minute to start · builds the database</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="6"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>This one function creates all 14 tabs with their headers, the four roles, the
+        permission matrix, the starter categories, the Drive folders, and your own
+        administrator account.</p>
+        <ol class="do">
+          <li>In the toolbar above the code, open the function dropdown. It currently says <code>doGet</code> or <code>myFunction</code>.</li>
+          <li>Choose <strong>setupSystem</strong> from the list.</li>
+          <li>Click <strong>▶ Run</strong>.</li>
+        </ol>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>It will stop and ask for permission. That is expected — continue to
+          <strong>step 7</strong>, then come back and press Run again.</span>
+        </div>
+        <details>
+          <summary>setupSystem is not in the dropdown</summary>
+          <div class="details-body">
+            <p>The file was not saved, or the paste was incomplete. Press
+            <kbd>Ctrl</kbd> + <kbd>S</kbd>, wait for “Saved”, then reload the browser tab.
+            If it is still missing, redo step 3.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- STEP 7 ------------------------------------------------------- -->
+    <article class="step" id="step-7" data-step="7">
+      <div class="step-head">
+        <div class="marker">07</div>
+        <div>
+          <h2 class="step-title">Authorise the permissions</h2>
+          <div class="step-meta">≈ 2 minutes · once only</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="7"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>Google shows a scary-looking warning here. It appears for every private script
+        that has not gone through Google's public add-on review. It is your own code,
+        in your own account.</p>
+        <ol class="do">
+          <li>Click <strong>Review permissions</strong>.</li>
+          <li>Choose your Google account.</li>
+          <li>You will see <em>“Google hasn't verified this app”</em>. Click <strong>Advanced</strong> at the bottom left.</li>
+          <li>Click <strong>Go to SQL Query Notebook (unsafe)</strong>.</li>
+          <li>Read the permission list, then click <strong>Allow</strong>.</li>
+        </ol>
+
+        <figure class="fig">
+          <svg viewBox="0 0 620 190" role="img" aria-label="Diagram of the Google authorisation warning screen, showing the Advanced link at the bottom left which reveals the Go to project link.">
+            <rect x="14" y="14" width="272" height="162" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+            <text x="34" y="46" font-size="12" font-weight="600" fill="var(--ink)">Google hasn't verified this app</text>
+            <text x="34" y="70" font-size="10" fill="var(--ink-3)">The app is requesting access to sensitive</text>
+            <text x="34" y="85" font-size="10" fill="var(--ink-3)">info in your Google Account.</text>
+            <rect x="34" y="128" width="66" height="22" rx="5" fill="var(--sunk)" stroke="var(--rule)"/>
+            <text x="67" y="143" font-size="10" fill="var(--ink-2)" text-anchor="middle">Advanced</text>
+            <rect x="196" y="128" width="66" height="22" rx="5" fill="var(--sunk)" stroke="var(--rule)"/>
+            <text x="229" y="143" font-size="10" fill="var(--ink-2)" text-anchor="middle">Back to safety</text>
+            <circle cx="67" cy="139" r="15" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <text x="67" y="172" font-family="var(--mono)" font-size="9" fill="var(--accent-ink)" text-anchor="middle">1. click this</text>
+
+            <path d="M296 95 L328 95" stroke="var(--ink-3)" stroke-width="1.5"/>
+            <path d="M322 90 L328 95 L322 100" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/>
+
+            <rect x="338" y="14" width="268" height="162" rx="8" fill="var(--card)" stroke="var(--rule)"/>
+            <text x="358" y="46" font-size="12" font-weight="600" fill="var(--ink)">Google hasn't verified this app</text>
+            <text x="358" y="70" font-size="10" fill="var(--ink-3)">The app is requesting access to sensitive</text>
+            <text x="358" y="85" font-size="10" fill="var(--ink-3)">info in your Google Account.</text>
+            <line x1="358" y1="100" x2="586" y2="100" stroke="var(--rule-soft)"/>
+            <rect x="352" y="108" width="200" height="20" rx="4" fill="var(--accent-bg)"/>
+            <text x="358" y="122" font-size="10" fill="var(--accent-ink)">Go to SQL Query Notebook (unsafe)</text>
+            <text x="450" y="158" font-family="var(--mono)" font-size="9" fill="var(--accent-ink)" text-anchor="middle">2. then click this</text>
+          </svg>
+          <figcaption>The warning is standard for private scripts. <strong>Advanced</strong> reveals the link that lets you continue.</figcaption>
+        </figure>
+
+        <p>Now click <strong>▶ Run</strong> again. Watch the <strong>Execution log</strong>
+        panel at the bottom.</p>
+        <pre class="log">=========================================
+ SQL Query Notebook — setup complete
+=========================================
+Spreadsheet : SQL Query Notebook DB
+Sheets created  : Queries, Categories, Databases, Users, ...
+Seeded          : Roles, Permissions, Categories, Databases,
+                  Settings, Admin user (you@company.com)
+Drive root      : https://drive.google.com/...</pre>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> switch to the spreadsheet tab — it now
+          has 14 tabs with bold headers. A Drive folder called
+          <em>SQL Query Notebook</em> now exists with four subfolders.</span>
+        </div>
+        <details>
+          <summary>Is it safe to run setupSystem again?</summary>
+          <div class="details-body">
+            <p>Yes, at any time. It only adds what is missing and never overwrites data.
+            If you ever rename or delete a tab by accident, running it again rebuilds it.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- STEP 8 ------------------------------------------------------- -->
+    <article class="step" id="step-8" data-step="8">
+      <div class="step-head">
+        <div class="marker">08</div>
+        <div>
+          <h2 class="step-title">Load the demo data</h2>
+          <div class="step-meta">≈ 1 minute · optional but recommended</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="8"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>Ten example queries, so the application has something to show the first time
+        you open it. Skip this if you would rather start empty.</p>
+        <ol class="do">
+          <li>In the function dropdown, choose <strong>seedDemoData</strong>.</li>
+          <li>Click <strong>▶ Run</strong>.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the log reports
+          <em>Inserted 10 demo queries (SQL-000001 … SQL-000010)</em>, and the
+          <code>Queries</code> tab now has ten rows.</span>
+        </div>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>The demo SQL is illustrative. It assumes a courier and logistics
+          schema that will not match your warehouse. Every demo query is tagged
+          <code>demo</code> so you can filter and delete them later.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ======================================================= PHASE D -->
+    <div class="phase">
+      <span class="phase-label">Phase D · Publish</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- STEP 9 ------------------------------------------------------- -->
+    <article class="step" id="step-9" data-step="9">
+      <div class="step-head">
+        <div class="marker">09</div>
+        <div>
+          <h2 class="step-title">Deploy as a web app</h2>
+          <div class="step-meta">≈ 3 minutes · the most important settings in this manual</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="9"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <ol class="do">
+          <li>Top right, click <strong>Deploy → New deployment</strong>.</li>
+          <li>Click the gear icon next to <em>Select type</em> and choose <strong>Web app</strong>.</li>
+          <li>Fill in the three fields exactly as below.</li>
+        </ol>
+        <dl class="setting">
+          <dt>Description</dt><dd>v1.0.0 <em>— any text, for your own reference</em></dd>
+          <dt>Execute as</dt><dd>Me (your@email.com)</dd>
+          <dt>Who has access</dt><dd>Anyone within your organisation</dd>
+        </dl>
+        <ol class="do" start="4" style="counter-reset: doitem 3;">
+          <li>Click <strong>Deploy</strong> and authorise again if asked.</li>
+          <li><strong>Copy the Web app URL.</strong> It looks like
+          <code>https://script.google.com/a/macros/…/exec</code></li>
+        </ol>
+
+        <div class="note stop">
+          <span class="ico">✱</span>
+          <span><strong>“Execute as” must stay “Me”.</strong> That setting is what lets the
+          script read the spreadsheet while your users have no access to it at all —
+          which is the entire basis of the permission system. If you set it to
+          <em>User accessing the web app</em>, every user would need edit access to the
+          spreadsheet, handing them the whole dataset and letting them rewrite the
+          permission table.</span>
+        </div>
+
+        <p><strong>Choosing “Who has access”</strong></p>
+        <div class="scroller">
+          <table class="t">
+            <tr><th>Option</th><th>Use when</th><th>Effect</th></tr>
+            <tr><td><strong>Anyone within your organisation</strong></td><td>A company Workspace account</td><td>Recommended. Google sign-in identifies people reliably</td></tr>
+            <tr><td>Anyone with a Google account</td><td>External collaborators</td><td>Google identity may come back empty; the app falls back to application passwords</td></tr>
+            <tr><td>Only myself</td><td>Testing</td><td>Nobody else can open it</td></tr>
+          </table>
+        </div>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>Share the <strong>web app URL</strong> with your team. Never share the
+          spreadsheet — anyone with edit access to it bypasses every permission in the
+          application.</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- STEP 10 ------------------------------------------------------ -->
+    <article class="step" id="step-10" data-step="10">
+      <div class="step-head">
+        <div class="marker">10</div>
+        <div>
+          <h2 class="step-title">Open it and sign in</h2>
+          <div class="step-meta">≈ 1 minute · first look</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="10"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <ol class="do">
+          <li>Paste the Web app URL into a browser tab.</li>
+          <li>Sign in with the same Google account if prompted.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the dashboard, with your name and an
+          <strong>Admin</strong> badge in the top right, and — if you ran step 8 — ten
+          queries and a set of statistics.</span>
+        </div>
+        <p>Try these three things to confirm everything works:</p>
+        <ul>
+          <li>Press <kbd>Ctrl</kbd> + <kbd>K</kbd> and type <code>rider</code> — search should find matches inside the SQL.</li>
+          <li>Open <code>SQL-000001</code>, then <strong>History → Compare</strong> — you should see a coloured line-by-line diff.</li>
+          <li>Open the same URL on your phone — the layout should switch to cards with a bottom navigation bar.</li>
+        </ul>
+        <details>
+          <summary>“Your Google account is not registered”</summary>
+          <div class="details-body">
+            <p>This is the application working correctly — it only lets registered people
+            in. It means the email Google reported does not match the <code>Users</code> tab.</p>
+            <p>Open the spreadsheet, check the <code>Users</code> tab, and confirm the email
+            in row 2 is spelled exactly right. If the wrong account was used to run setup,
+            re-run <code>setupSystem()</code> from the correct account.</p>
+          </div>
+        </details>
+        <details>
+          <summary>The page is blank</summary>
+          <div class="details-body">
+            <p>Almost always the HTML file name. It must be exactly <code>Index</code> —
+            capital I, no extension typed. Rename it in the Files panel, save, then
+            <strong>Deploy → Manage deployments → edit → New version → Deploy</strong>.</p>
+          </div>
+        </details>
+        <details>
+          <summary>“The application is not set up yet”</summary>
+          <div class="details-body">
+            <p><code>setupSystem()</code> has not run successfully. Go back to step 6 and
+            check the execution log for an error.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ======================================================= PHASE E -->
+    <div class="phase">
+      <span class="phase-label">Phase E · Go live</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- STEP 11 ------------------------------------------------------ -->
+    <article class="step" id="step-11" data-step="11">
+      <div class="step-head">
+        <div class="marker">11</div>
+        <div>
+          <h2 class="step-title">Add your team</h2>
+          <div class="step-meta">≈ 3 minutes · inside the application</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="11"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>People cannot sign in until you add their email address, even if they are in
+        your organisation.</p>
+        <ol class="do">
+          <li>In the sidebar, click <strong>Users</strong>.</li>
+          <li>Click <strong>+ Add User</strong>.</li>
+          <li>Enter their name, work email address and role. Leave the password checkbox unticked — they sign in with Google.</li>
+          <li>Repeat for each person, then send them the web app URL.</li>
+        </ol>
+        <div class="scroller">
+          <table class="t">
+            <tr><th>Role</th><th>Can do</th><th>Give it to</th></tr>
+            <tr><td><strong>Admin</strong></td><td>Everything, including users, roles, settings and backups</td><td>You, and one backup person</td></tr>
+            <tr><td><strong>Manager</strong></td><td>Create, edit and delete any query; restore; export</td><td>Team leads</td></tr>
+            <tr><td><strong>Editor</strong></td><td>Create and edit their own queries; share</td><td>Analysts who write SQL</td></tr>
+            <tr><td><strong>Viewer</strong></td><td>View, search and copy only</td><td>Everyone else</td></tr>
+          </table>
+        </div>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>Always have a <strong>second Admin</strong>. The application refuses to
+          remove the last active administrator, so if you are the only one and you lose
+          access, recovery means editing the spreadsheet by hand.</span>
+        </div>
+        <details>
+          <summary>Test that permissions actually work</summary>
+          <div class="details-body">
+            <p>Ask a Viewer to open the app. They should see no <strong>New Query</strong>
+            button, no <strong>Edit</strong>, and no <em>Manage</em> section in the sidebar.</p>
+            <p>The hidden buttons are only a courtesy — the server refuses the actions
+            too. You can confirm that: open <strong>Activity Logs</strong> and look for
+            <code>ACCESS_DENIED</code> entries.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- STEP 12 ------------------------------------------------------ -->
+    <article class="step" id="step-12" data-step="12">
+      <div class="step-head">
+        <div class="marker">12</div>
+        <div>
+          <h2 class="step-title">Turn on maintenance</h2>
+          <div class="step-meta">≈ 3 minutes · back in Apps Script</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="12"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>Three one-off jobs. Run each from the function dropdown, exactly as in step 6.</p>
+        <div class="scroller">
+          <table class="t">
+            <tr><th>Function</th><th>What it does</th></tr>
+            <tr><td class="mono">installTriggers</td><td>Adds the hourly job that expires idle sessions</td></tr>
+            <tr><td class="mono">sendTestNotification</td><td>Sends you a test email — confirms notifications work</td></tr>
+            <tr><td class="mono">showConfiguration</td><td>Prints the configuration to the log so you can check it</td></tr>
+          </table>
+        </div>
+        <p style="margin-top:16px"><strong>Add a weekly backup:</strong></p>
+        <ol class="do">
+          <li>In the far-left icon bar, click the <strong>clock icon</strong> (Triggers).</li>
+          <li>Click <strong>+ Add Trigger</strong> at the bottom right.</li>
+          <li>Function to run: <code>runScheduledBackup</code></li>
+          <li>Event source: <strong>Time-driven</strong> → <strong>Week timer</strong> → Sunday, 3am–4am.</li>
+          <li>Click <strong>Save</strong>.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> a test email in your inbox, and the
+          Triggers page listing two triggers — <code>cleanupExpiredSessions</code> and
+          <code>runScheduledBackup</code>.</span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- ======================================================= OPTIONAL -->
+    <div class="phase">
+      <span class="phase-label">Optional · Back it up on GitHub</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <article class="step" id="step-13" data-step="13">
+      <div class="step-head">
+        <div class="marker">13</div>
+        <div>
+          <h2 class="step-title">Put it on GitHub</h2>
+          <div class="step-meta">≈ 5 minutes · optional · no command line needed</div>
+        </div>
+        <label class="tick"><input type="checkbox" data-check="13"><span>Done</span></label>
+      </div>
+      <div class="step-body">
+        <p>Apps Script keeps no history you can browse and no way to see what changed
+        between two versions. GitHub gives you both, plus somewhere the code survives
+        if the Google account is ever lost. This step is optional — the application
+        runs perfectly without it.</p>
+
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>These files are safe to publish.</strong> I checked: no
+          spreadsheet IDs, no Drive folder IDs, no script ID, no passwords, no API keys
+          and no company data. All real IDs live in Script Properties inside your Apps
+          Script project, which never leaves Google.</span>
+        </div>
+
+        <h3 style="font-size:15px;margin:22px 0 8px">Option A · Upload in the browser <span style="font-weight:400;color:var(--ink-3)">(recommended)</span></h3>
+        <p>No git install, no command line. Drag and drop.</p>
+        <ol class="do">
+          <li>Go to <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>. Sign up first if you do not have an account — it is free.</li>
+          <li>Repository name:</li>
+        </ol>
+        <span class="copy"><span class="val">sql-query-notebook</span><button data-copy="sql-query-notebook">Copy</button></span>
+        <ol class="do" start="3" style="counter-reset: doitem 2; margin-top:14px">
+          <li>Description (optional):</li>
+        </ol>
+        <span class="copy"><span class="val">SQL query manager on Google Sheets, Apps Script and Drive</span><button data-copy="SQL query manager on Google Sheets, Apps Script and Drive">Copy</button></span>
+        <ol class="do" start="4" style="counter-reset: doitem 3; margin-top:14px">
+          <li>Choose <strong>Private</strong> or <strong>Public</strong> — see the note below.</li>
+          <li>Leave <em>Add a README</em>, <em>.gitignore</em> and <em>license</em> all <strong>unticked</strong>. Your folder already has them, and ticking these creates a conflict.</li>
+          <li>Click <strong>Create repository</strong>.</li>
+          <li>On the next page click <strong>uploading an existing file</strong>.</li>
+          <li>Open <code>E:\SQL Query Notebook\SQL-Query-Notebook-2-FILES</code> in File Explorer.</li>
+          <li>Select everything <em>except</em> the <code>_to_delete</code> folder, and drag it onto the GitHub page.</li>
+          <li>Wait for all files to finish uploading, then click <strong>Commit changes</strong>.</li>
+        </ol>
+        <div class="note check">
+          <span class="ico">✓</span>
+          <span><strong>What you should see:</strong> the repository page listing
+          <code>Code.gs</code>, <code>Index.html</code>, <code>appsscript.json</code>,
+          <code>README.md</code>, <code>SETUP.md</code>, <code>LICENSE</code>,
+          <code>preview.html</code> and a <code>docs</code> folder — with your README
+          rendered underneath.</span>
+        </div>
+
+        <h3 style="font-size:15px;margin:26px 0 8px">Option B · Command line</h3>
+        <p>If you have Git for Windows installed. Open the folder in File Explorer,
+        type <code>cmd</code> in the address bar and press Enter, then run:</p>
+        <span class="copy" style="display:flex"><span class="val" style="white-space:pre">git init -b main
+git add .
+git commit -m "SQL Query Notebook v1.0.0"
+git remote add origin https://github.com/YOUR-USERNAME/sql-query-notebook.git
+git push -u origin main</span><button data-copy="git init -b main&#10;git add .&#10;git commit -m &quot;SQL Query Notebook v1.0.0&quot;&#10;git remote add origin https://github.com/YOUR-USERNAME/sql-query-notebook.git&#10;git push -u origin main">Copy</button></span>
+        <p style="margin-top:12px">Replace <code>YOUR-USERNAME</code> with your GitHub
+        username. GitHub will ask you to sign in the first time you push.</p>
+        <div class="note warn">
+          <span class="ico">!</span>
+          <span>Delete the <code>_to_delete</code> folder first, in File Explorer.
+          It holds a half-built git folder that would confuse <code>git init</code>.</span>
+        </div>
+
+        <h3 style="font-size:15px;margin:26px 0 8px">Private or public?</h3>
+        <div class="scroller">
+          <table class="t">
+            <tr><th>Choose</th><th>When</th></tr>
+            <tr><td><strong>Private</strong></td><td>The default choice. Only you and people you invite can see it. Everything still works — history, diffs, releases.</td></tr>
+            <tr><td><strong>Public</strong></td><td>Anyone can read it. Fine for this code, which contains no secrets. Choose it only if you actively want to share the project.</td></tr>
+          </table>
+        </div>
+        <div class="note stop">
+          <span class="ico">✱</span>
+          <span><strong>Never commit <code>.clasp.json</code>.</strong> That file holds
+          your Apps Script project ID. The included <code>.gitignore</code> already
+          excludes it, along with <code>.env</code>, key files and credential JSON —
+          but check before every upload that you are not adding one by hand.</span>
+        </div>
+
+        <h3 style="font-size:15px;margin:26px 0 8px">Keeping it up to date</h3>
+        <p>GitHub does not talk to Apps Script automatically. When you change the code,
+        update both:</p>
+        <ol class="do">
+          <li>Edit <code>Code.gs</code> or <code>Index.html</code> in the Apps Script editor.</li>
+          <li>Copy the changed file back over the one in your local folder.</li>
+          <li>On GitHub, open that file, click the <strong>pencil</strong> icon, paste the new contents, and <strong>Commit changes</strong> with a short note saying what changed.</li>
+        </ol>
+        <p>Because GitHub keeps every version, you can open any file's <strong>History</strong>
+        to see exactly what changed and when — the thing Apps Script cannot show you.</p>
+        <details>
+          <summary>Advanced: push straight from Apps Script with clasp</summary>
+          <div class="details-body">
+            <p><code>clasp</code> is Google's command line tool. It removes the copy-paste
+            step entirely — you edit locally, run one command, and the code is in Apps
+            Script.</p>
+            <p>Install with <code>npm install -g @google/clasp</code>, sign in with
+            <code>clasp login</code>, then create <code>.clasp.json</code> containing your
+            Script ID (Project Settings in the editor). After that,
+            <code>clasp push</code> uploads and <code>clasp pull</code> downloads.</p>
+            <p>Worth it if you edit often. Overkill if you paste twice a year.</p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ================================================== final check -->
+    <section class="final">
+      <h2>Before you tell people it's live</h2>
+      <p style="color:var(--ink-2)">Six checks. The first one is the one that matters most.</p>
+      <ul class="checklist">
+        <li><span class="bx">☐</span><span><strong>The spreadsheet is shared with nobody.</strong> Open it, click <strong>Share</strong>, and confirm you are the only person listed. Anyone with edit access here bypasses every permission in the application.</span></li>
+        <li><span class="bx">☐</span><span>The deployment says <strong>Execute as: Me</strong>.</span></li>
+        <li><span class="bx">☐</span><span>Two-factor authentication is on for the Google account you deployed from.</span></li>
+        <li><span class="bx">☐</span><span>A Viewer account really cannot see New Query, Edit, or the Manage section.</span></li>
+        <li><span class="bx">☐</span><span>There is a second Admin.</span></li>
+        <li><span class="bx">☐</span><span>Demo data has been removed, or you have decided to keep it.</span></li>
+      </ul>
+    </section>
+
+    <!-- ================================================== updating -->
+    <section class="intro" style="margin-top:26px">
+      <h2>Updating it later</h2>
+      <p>When you change the code, paste the new file in, save, then publish a new version:</p>
+      <p><strong>Deploy → Manage deployments → ✏️ edit → Version: New version → Deploy.</strong></p>
+      <div class="note warn">
+        <span class="ico">!</span>
+        <span>Use <strong>New version</strong> on the deployment you already have. Creating
+        a <em>New deployment</em> gives you a different URL and leaves everybody on the old
+        code — a confusing failure to diagnose.</span>
+      </div>
+      <p>The URL stays the same, your data is untouched, and users get the update on their
+      next page load. To roll back, open the same dialog and pick an earlier version.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  SQL Query Notebook v1.0.0 · Installation manual · Built on Google Sheets, Apps Script and Drive.
+  Demo SQL is illustrative and assumes a schema that will not match yours.
+</footer>
+
+<button class="themer" id="themer" aria-label="Switch between light and dark" title="Light / dark">
+  <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.7"/>
+    <path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>
+  </svg>
+</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var STEPS = [
+    { n: 1,  t: 'Create the Google Sheet',        g: 'Prepare' },
+    { n: 2,  t: 'Open the Apps Script editor',    g: null },
+    { n: 3,  t: 'Paste the backend',              g: 'Install the code' },
+    { n: 4,  t: 'Add Index.html',                 g: null },
+    { n: 5,  t: 'Set the manifest',               g: null },
+    { n: 6,  t: 'Run setupSystem()',              g: 'Initialise' },
+    { n: 7,  t: 'Authorise permissions',          g: null },
+    { n: 8,  t: 'Load the demo data',             g: null },
+    { n: 9,  t: 'Deploy as a web app',            g: 'Publish' },
+    { n: 10, t: 'Open it and sign in',            g: null },
+    { n: 11, t: 'Add your team',                  g: 'Go live' },
+    { n: 12, t: 'Turn on maintenance',            g: null },
+    { n: 13, t: 'Put it on GitHub',               g: 'Optional' }
+  ];
+
+  var KEY = 'sqn.install.progress';
+  var THEME_KEY = 'sqn.install.theme';
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  var state = load();
+
+  /* ------------------------------------------------------------- rail */
+  var rail = document.getElementById('railLinks');
+  rail.innerHTML = STEPS.map(function (s) {
+    var group = s.g ? '<div class="rail-group">' + s.g + '</div>' : '';
+    return group +
+      '<button class="rail-link" data-go="' + s.n + '">' +
+        '<span class="n">' + (s.n < 10 ? '0' + s.n : s.n) + '</span>' +
+        '<span class="t">' + s.t + '</span>' +
+      '</button>';
+  }).join('');
+
+  function paint() {
+    var done = 0;
+    STEPS.forEach(function (s) {
+      var on = !!state[s.n];
+      if (on) done++;
+
+      var card = document.getElementById('step-' + s.n);
+      if (card) card.classList.toggle('done', on);
+
+      var box = document.querySelector('[data-check="' + s.n + '"]');
+      if (box) box.checked = on;
+
+      var link = document.querySelector('[data-go="' + s.n + '"]');
+      if (link) link.classList.toggle('done', on);
+    });
+
+    document.getElementById('railCount').textContent = done + ' / ' + STEPS.length;
+    document.getElementById('barFill').style.width = (done / STEPS.length * 100) + '%';
+
+    // Mark the first unfinished step as the current one.
+    document.querySelectorAll('.rail-link').forEach(function (el) { el.classList.remove('here'); });
+    var next = STEPS.filter(function (s) { return !state[s.n]; })[0];
+    if (next) {
+      var el = document.querySelector('[data-go="' + next.n + '"]');
+      if (el) el.classList.add('here');
+    }
+  }
+
+  document.addEventListener('change', function (e) {
+    var box = e.target.closest('[data-check]');
+    if (!box) return;
+    state[box.getAttribute('data-check')] = box.checked;
+    save(state);
+    paint();
+  });
+
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go) {
+      var el = document.getElementById('step-' + go.getAttribute('data-go'));
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    var cp = e.target.closest('[data-copy]');
+    if (cp) {
+      copy(cp.getAttribute('data-copy'), cp);
+      return;
+    }
+  });
+
+  document.getElementById('btnReset').addEventListener('click', function () {
+    state = {};
+    save(state);
+    paint();
+    toast('Progress cleared');
+  });
+
+  /* ---------------------------------------------------------- copying */
+  function copy(text, btn) {
+    function done(ok) {
+      if (!ok) { toast('Could not copy — select the text and copy manually'); return; }
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('ok');
+      toast('Copied: ' + text);
+      setTimeout(function () { btn.textContent = was; btn.classList.remove('ok'); }, 1600);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallback()); });
+    } else {
+      done(fallback());
+    }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) { return false; }
+    }
+  }
+
+  /* ------------------------------------------------------------ toast */
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, 2000);
+  }
+
+  /* ------------------------------------------------------------ theme */
+  var themer = document.getElementById('themer');
+  try {
+    var stored = localStorage.getItem(THEME_KEY);
+    if (stored) document.documentElement.setAttribute('data-theme', stored);
+  } catch (e) {}
+
+  themer.addEventListener('click', function () {
+    var cur = document.documentElement.getAttribute('data-theme');
+    if (!cur) {
+      var dark = false;
+      try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+      cur = dark ? 'dark' : 'light';
+    }
+    var next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  });
+
+  paint();
+})();
+</script>
