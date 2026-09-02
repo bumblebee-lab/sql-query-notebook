@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL Query Notebook</title>
+<meta name="description" content="A shared home for your team's SQL queries. Search, version, share and audit — built on Google Sheets, Apps Script and Drive. No server, no cost.">
+
+<meta property="og:title" content="SQL Query Notebook">
+<meta property="og:description" content="Search, version, share and audit your team's SQL. Built on Google Sheets and Apps Script. The whole app is two files.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================================
+   Dark-first landing page. The product is a developer tool, so the ground is
+   a terminal-dark navy and the hero anchor is real syntax-highlighted SQL.
+   Light theme is a full inversion, not an afterthought.
+   ========================================================================= */
+:root {
+  color-scheme: dark;
+
+  --bg:        #080A11;
+  --bg-2:      #0E121C;
+  --surface:   #131826;
+  --surface-2: #1A2032;
+  --rule:      #232A3D;
+  --rule-soft: #1A2032;
+
+  --ink:       #F2F4FA;
+  --ink-2:     #A6AEC4;
+  --ink-3:     #6B7489;
+
+  --accent:    #8B6CFF;
+  --accent-2:  #5B8DEF;
+  --accent-bg: #1C1740;
+  --accent-ink:#C0AEFF;
+
+  --ok:        #4ADE80;
+  --ok-bg:     #0E2A1B;
+  --warn:      #FBBF24;
+
+  --kw:        #C4B5FD;
+  --fn:        #5EEAD4;
+  --str:       #FCD34D;
+  --num:       #FCA5A5;
+  --com:       #59627C;
+  --op:        #99A2BA;
+  --gutter:    #333C56;
+
+  --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 24px 64px rgba(0,0,0,.45);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.45);
+  --max: 1080px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:        #FBFBFE;
+    --bg-2:      #FFFFFF;
+    --surface:   #FFFFFF;
+    --surface-2: #F4F5FA;
+    --rule:      #E2E5F0;
+    --rule-soft: #EDEFF7;
+    --ink:       #10131C;
+    --ink-2:     #4C5265;
+    --ink-3:     #838BA0;
+    --accent:    #5B3DF5;
+    --accent-2:  #2563EB;
+    --accent-bg: #EEEBFF;
+    --accent-ink:#4A2FD6;
+    --ok:        #15803D;
+    --ok-bg:     #E4F7EA;
+    --warn:      #A65B06;
+    --kw:        #7C3AED;
+    --fn:        #0F766E;
+    --str:       #B45309;
+    --num:       #B91C1C;
+    --com:       #98A0B4;
+    --op:        #4C5568;
+    --gutter:    #B9C0D2;
+    --shadow:    0 1px 2px rgba(16,19,28,.05), 0 22px 56px rgba(16,19,28,.09);
+    --shadow-sm: 0 1px 2px rgba(16,19,28,.06);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:        #FBFBFE;
+  --bg-2:      #FFFFFF;
+  --surface:   #FFFFFF;
+  --surface-2: #F4F5FA;
+  --rule:      #E2E5F0;
+  --rule-soft: #EDEFF7;
+  --ink:       #10131C;
+  --ink-2:     #4C5265;
+  --ink-3:     #838BA0;
+  --accent:    #5B3DF5;
+  --accent-2:  #2563EB;
+  --accent-bg: #EEEBFF;
+  --accent-ink:#4A2FD6;
+  --ok:        #15803D;
+  --ok-bg:     #E4F7EA;
+  --warn:      #A65B06;
+  --kw:        #7C3AED;
+  --fn:        #0F766E;
+  --str:       #B45309;
+  --num:       #B91C1C;
+  --com:       #98A0B4;
+  --op:        #4C5568;
+  --gutter:    #B9C0D2;
+  --shadow:    0 1px 2px rgba(16,19,28,.05), 0 22px 56px rgba(16,19,28,.09);
+  --shadow-sm: 0 1px 2px rgba(16,19,28,.06);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3 { margin: 0; font-weight: 600; letter-spacing: -.022em; text-wrap: balance; }
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 5px; }
+img { max-width: 100%; height: auto; display: block; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+/* ------------------------------------------------------------------- nav */
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav-in {
+  max-width: var(--max); margin: 0 auto; padding: 12px 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.mark {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid; place-items: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; color: #fff;
+}
+.nav-name { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+.nav-links { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.nav-links a {
+  color: var(--ink-2); text-decoration: none; font-size: 14px;
+  padding: 6px 11px; border-radius: 7px;
+}
+.nav-links a:hover { color: var(--ink); background: var(--surface-2); }
+.themer {
+  width: 32px; height: 32px; border-radius: 8px; margin-left: 4px;
+  border: 1px solid var(--rule); background: var(--surface);
+  color: var(--ink-2); cursor: pointer; display: grid; place-items: center;
+}
+.themer:hover { color: var(--ink); }
+
+/* ----------------------------------------------------------------- hero */
+.hero { padding: 62px 0 56px; }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-ink);
+  background: var(--accent-bg); border: 1px solid var(--rule);
+  padding: 5px 11px; border-radius: 20px; margin-bottom: 20px;
+}
+.hero h1 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; margin-bottom: 18px; font-weight: 700; }
+.hero .sub { font-size: 17.5px; color: var(--ink-2); max-width: 46ch; margin-bottom: 28px; }
+
+.cta { display: flex; gap: 11px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 19px; border-radius: 10px; font-size: 14.5px; font-weight: 600;
+  text-decoration: none; border: 1px solid transparent; white-space: nowrap;
+  transition: transform .12s ease, filter .12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.09); }
+.btn-ghost { background: var(--surface); border-color: var(--rule); color: var(--ink); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn svg { width: 16px; height: 16px; }
+
+.hero-note { margin-top: 18px; font-size: 13px; color: var(--ink-3); }
+
+/* SQL card — the most characteristic object in this product's world */
+.sqlcard {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; overflow: hidden; box-shadow: var(--shadow);
+}
+.sqlcard-bar {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 14px; border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+.sqlcard-id {
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 4px;
+}
+.chip {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 20px; margin-left: auto;
+  background: var(--accent-bg); color: var(--accent-ink);
+}
+.chip.v { background: var(--ok-bg); color: var(--ok); margin-left: 6px; }
+pre.sql {
+  margin: 0; padding: 15px 16px 17px 0; overflow-x: auto;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.66; color: var(--ink);
+}
+pre.sql .ln {
+  display: inline-block; width: 42px; padding-right: 13px;
+  text-align: right; color: var(--gutter); user-select: none;
+}
+.kw{color:var(--kw);font-weight:600}.fn{color:var(--fn)}.st{color:var(--str)}
+.nu{color:var(--num)}.co{color:var(--com);font-style:italic}.op{color:var(--op)}
+
+/* ---------------------------------------------------------------- strip */
+.strip { border-block: 1px solid var(--rule); background: var(--bg-2); }
+.strip-in {
+  max-width: var(--max); margin: 0 auto; padding: 0 24px;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+}
+.stat { padding: 24px 0; border-left: 1px solid var(--rule); padding-left: 22px; }
+.stat:first-child { border-left: 0; padding-left: 0; }
+.stat dt {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px;
+}
+.stat dd { margin: 0; font-size: 25px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.stat dd small { font-size: 13px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
+
+/* -------------------------------------------------------------- section */
+section { padding: 66px 0; }
+.sec-head { max-width: 60ch; margin-bottom: 34px; }
+.sec-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 11px;
+}
+.sec-head h2 { font-size: clamp(23px, 3vw, 30px); line-height: 1.2; margin-bottom: 12px; }
+.sec-head p { color: var(--ink-2); font-size: 16.5px; }
+
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 20px;
+}
+.feature .ico {
+  width: 34px; height: 34px; border-radius: 9px; margin-bottom: 13px;
+  background: var(--accent-bg); color: var(--accent-ink);
+  display: grid; place-items: center;
+}
+.feature .ico svg { width: 17px; height: 17px; }
+.feature h3 { font-size: 15.5px; margin-bottom: 6px; }
+.feature p { font-size: 14px; color: var(--ink-2); margin: 0; }
+
+.shot {
+  border: 1px solid var(--rule); border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow); background: var(--surface);
+}
+.shot img { width: 100%; }
+figcaption {
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+  text-align: center; margin-top: 13px;
+}
+
+/* how it works */
+.flow {
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.85;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 20px 22px; overflow-x: auto;
+  color: var(--ink-2); white-space: pre;
+}
+.flow b { color: var(--accent-ink); font-weight: 500; }
+.flow i { color: var(--ok); font-style: normal; }
+
+.rule-note {
+  display: grid; grid-template-columns: 3px 1fr; gap: 16px;
+  margin-top: 20px;
+}
+.rule-note .bar { background: var(--accent); border-radius: 3px; }
+.rule-note p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.rule-note strong { color: var(--ink); }
+
+/* install */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stepbox {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 18px;
+}
+.stepbox .n {
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  color: var(--accent); margin-bottom: 9px;
+}
+.stepbox h3 { font-size: 14.5px; margin-bottom: 5px; }
+.stepbox p { font-size: 13.5px; color: var(--ink-2); margin: 0; }
+.stepbox code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface-2); border: 1px solid var(--rule-soft);
+  padding: 1px 5px; border-radius: 4px; color: var(--ink);
+}
+
+table.t { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+table.t th, table.t td {
+  text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule-soft);
+}
+table.t th {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  border-bottom-color: var(--rule);
+}
+table.t td { color: var(--ink-2); }
+table.t td:first-child { color: var(--ink); font-weight: 500; white-space: nowrap; }
+table.t tr:last-child td { border-bottom: 0; }
+.scroller { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+
+.callout {
+  display: grid; grid-template-columns: 20px 1fr; gap: 12px;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left: 3px solid var(--warn);
+  border-radius: 10px; padding: 15px 17px; font-size: 14.5px; color: var(--ink-2);
+}
+.callout .m { color: var(--warn); font-family: var(--mono); font-weight: 700; }
+.callout strong { color: var(--ink); }
+
+footer {
+  border-top: 1px solid var(--rule); padding: 34px 0 56px;
+  font-size: 13.5px; color: var(--ink-3);
+}
+.foot-in { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.foot-in a { color: var(--ink-2); text-decoration: none; }
+.foot-in a:hover { color: var(--accent); }
+.foot-in .sp { margin-left: auto; }
+
+@media (max-width: 880px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 34px; }
+  .strip-in { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-left: 0; padding-left: 0; }
+  .grid3 { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .nav-links a { display: none; }
+  .nav-links a.keep { display: inline-flex; }
+  section { padding: 48px 0; }
+  .hero { padding: 40px 0 36px; }
+}
+@media (max-width: 520px) {
+  .steps { grid-template-columns: 1fr; }
+  body { font-size: 15.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <div class="mark">&lt;/&gt;</div>
+    <span class="nav-name">SQL Query Notebook</span>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a class="keep" href="https://github.com/bumblebee-lab/sql-query-notebook">GitHub</a>
+      <button class="themer" id="themer" aria-label="Switch light and dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Google Sheets · Apps Script · Drive</div>
+      <h1>Every SQL query your team relies on, in one place.</h1>
+      <p class="sub">
+        Stop hunting through Drive folders and chat history for the right version.
+        Search, version, share and audit your team's SQL — on infrastructure you
+        already pay nothing for.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="preview.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5 18.5 12 7 19.5z"/></svg>
+          Open the live demo
+        </a>
+        <a class="btn btn-ghost" href="install-manual.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg>
+          Installation manual
+        </a>
+      </div>
+      <p class="hero-note">The demo runs on ten example queries in your browser. Nothing is saved, nothing is sent anywhere.</p>
+    </div>
+
+    <figure class="sqlcard" style="margin:0">
+      <div class="sqlcard-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="sqlcard-id">SQL-000001 · Rider Performance KPI</span>
+        <span class="chip">Performance</span>
+        <span class="chip v">v2.0</span>
+      </div>
+<pre class="sql"><span class="ln">1</span><span class="co">-- weekly rider strike rate</span>
+<span class="ln">2</span><span class="kw">SELECT</span>
+<span class="ln">3</span>    r.rider_id,
+<span class="ln">4</span>    r.rider_name,
+<span class="ln">5</span>    <span class="fn">COUNT</span>(<span class="op">*</span>)                        <span class="kw">AS</span> shipments,
+<span class="ln">6</span>    <span class="fn">SUM</span>(s.delivered)              <span class="kw">AS</span> delivered,
+<span class="ln">7</span>    <span class="fn">ROUND</span>(<span class="fn">SUM</span>(s.delivered) <span class="op">*</span> <span class="nu">100.0</span>
+<span class="ln">8</span>          <span class="op">/</span> <span class="fn">COUNT</span>(<span class="op">*</span>), <span class="nu">2</span>)              <span class="kw">AS</span> strike_rate
+<span class="ln">9</span><span class="kw">FROM</span> riders r
+<span class="ln">10</span><span class="kw">LEFT JOIN</span> shipments s <span class="kw">ON</span> r.rider_id <span class="op">=</span> s.rider_id
+<span class="ln">11</span><span class="kw">WHERE</span> s.ship_date <span class="op">&gt;=</span> <span class="fn">CURRENT_DATE</span> <span class="op">-</span> <span class="nu">7</span>
+<span class="ln">12</span><span class="kw">GROUP BY</span> r.rider_id, r.rider_name
+<span class="ln">13</span><span class="kw">ORDER BY</span> strike_rate <span class="kw">DESC</span>;</pre>
+    </figure>
+  </div>
+</header>
+
+<div class="strip">
+  <dl class="strip-in">
+    <div class="stat"><dt>Files to install</dt><dd>2</dd></div>
+    <div class="stat"><dt>Screens</dt><dd>21</dd></div>
+    <div class="stat"><dt>Permissions</dt><dd>21<small> · 4 roles</small></dd></div>
+    <div class="stat"><dt>Monthly cost</dt><dd>0<small> · forever</small></dd></div>
+  </dl>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">What it does</div>
+      <h2>A query notebook, not another database tool</h2>
+      <p>It stores, versions and finds SQL. It never connects to a database and never
+      runs your queries — you copy the SQL into whatever you already have permission
+      to run it in.</p>
+    </div>
+
+    <div class="grid3">
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/></svg></div>
+        <h3>Search inside the SQL</h3>
+        <p>Full text across names, descriptions, tags, authors and the query body itself. Remember a table name but not the query name? That still finds it. <kbd>Ctrl</kbd>+<kbd>K</kbd> from anywhere.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5V10h5.5"/><path d="M12 7.8V12l3 1.8"/></svg></div>
+        <h3>Version history that never lies</h3>
+        <p>Every edit is an immutable version with a line-by-line diff. Restoring an old version creates a <em>new</em> one — the current version is never destroyed, so an undo is itself undoable.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.3 2.9 8.1 7 9 4.1-.9 7-4.7 7-9V6z"/><path d="m9.2 12.2 2 2 3.6-3.8"/></svg></div>
+        <h3>Permissions enforced on the server</h3>
+        <p>Four roles across a 21-permission matrix an admin edits live. Hidden buttons are a courtesy — every one has a matching server-side refusal.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="m8.3 10.8 7.4-4M8.3 13.2l7.4 4"/></svg></div>
+        <h3>Share with an expiry date</h3>
+        <p>Grant VIEW or EDIT to named colleagues, with an optional end date and an email notice. Links are shortcuts, never keys — recipients still sign in and still pass every check.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-7 5 14L17 12h4"/></svg></div>
+        <h3>An audit trail you can defend</h3>
+        <p>Append-only log of every login, view, copy, edit, delete and permission change — including the denied attempts, which are the interesting ones.</p>
+      </div>
+      <div class="feature">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><path d="M10 5.5h4M12 18.2v.1"/></svg></div>
+        <h3>Works on a phone</h3>
+        <p>Not a shrunken desktop — a real mobile layout with cards, a bottom bar and SQL that scrolls inside its own box. Light and dark throughout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <figure style="margin:0">
+      <div class="shot"><img src="screenshot-queries.jpg" width="1200" height="783"
+        alt="The All Queries screen: a table of SQL queries with category, database, tags, author, date and status columns, plus filters and a search bar."></div>
+      <figcaption>All Queries — filter, sort and search server side, then open any query in a detail panel.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="how" style="background:var(--bg-2);border-block:1px solid var(--rule)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">How it works</div>
+      <h2>Your spreadsheet is the database. Nobody gets to touch it.</h2>
+      <p>The web app runs as <em>you</em>, so it can read the spreadsheet while your
+      users have no access to it at all. That single deployment setting is what the
+      whole permission model rests on.</p>
+    </div>
+
+<div class="flow">   Browser                    Apps Script <b>(runs as YOU)</b>          Google
+   ───────                    ─────────────────────────          ──────
+   Index.html                 Code.gs                            Sheets   14 tabs
+   google.script.run(fn) ──▶  doGet()                            Drive    files
+                              <i>guard_()</i>  ◀── every call             Gmail    notices
+                                │
+                                ├─ who are you?        Session.getActiveUser()
+                                ├─ what is your role?  Users sheet
+                                └─ may you do this?    Permissions sheet</div>
+
+    <div class="rule-note">
+      <div class="bar"></div>
+      <p><strong>The browser never decides anything.</strong> All 57 API endpoints pass
+      through one function that resolves identity server side and checks permissions.
+      Any <code>role</code>, <code>userId</code>, <code>email</code> or
+      <code>permissions</code> field sent from the browser is ignored.</p>
+    </div>
+
+    <div class="sec-head" style="margin:44px 0 20px">
+      <h2 style="font-size:20px">What each role can do</h2>
+    </div>
+    <div class="scroller">
+      <table class="t">
+        <thead><tr><th>Role</th><th>Can do</th><th>Typically</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td>Everything, including users, roles, settings and backups</td><td>You, plus one backup person</td></tr>
+          <tr><td>Manager</td><td>Create, edit and delete any query; restore; export</td><td>Team leads</td></tr>
+          <tr><td>Editor</td><td>Create and edit their own queries; share</td><td>Analysts who write SQL</td></tr>
+          <tr><td>Viewer</td><td>View, search and copy only</td><td>Everyone else</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">Installing it</div>
+      <h2>Two files, one function, one Deploy button</h2>
+      <p>About 25 minutes start to finish. No coding, no server, no command line.
+      The full manual walks through all twelve steps with a tick-off checklist.</p>
+    </div>
+
+    <div class="steps">
+      <div class="stepbox">
+        <div class="n">01 — 02</div>
+        <h3>Prepare</h3>
+        <p>Create a Google Sheet, open <strong>Extensions → Apps Script</strong>.</p>
+      </div>
+      <div class="stepbox">
+        <div class="n">03 — 05</div>
+        <h3>Paste the code</h3>
+        <p>Paste <code>Code.gs</code> and <code>Index.html</code>, then replace the manifest.</p>
+      </div>
+      <div class="stepbox">
+        <div class="n">06 — 08</div>
+        <h3>Initialise</h3>
+        <p>Run <code>setupSystem()</code>. It builds all 14 tabs, the roles and the Drive folders.</p>
+      </div>
+      <div class="stepbox">
+        <div class="n">09 — 12</div>
+        <h3>Publish</h3>
+        <p>Deploy as a web app, add your team, switch on the maintenance jobs.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:22px">
+      <span class="m">!</span>
+      <span>Two settings decide whether this is secure: the deployment must be
+      <strong>Execute as: Me</strong>, and the spreadsheet must be shared with
+      <strong>nobody</strong>. Anyone with edit access to that Sheet bypasses every
+      permission in the application. Share the web app URL instead.</span>
+    </div>
+
+    <div class="cta" style="margin-top:26px">
+      <a class="btn btn-primary" href="install-manual.html">Read the installation manual</a>
+      <a class="btn btn-ghost" href="https://github.com/bumblebee-lab/sql-query-notebook">Get the code on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>SQL Query Notebook · v1.0.0 · MIT licence</span>
+    <span class="sp"></span>
+    <a href="https://github.com/bumblebee-lab/sql-query-notebook">Repository</a>
+    <a href="preview.html">Demo</a>
+    <a href="install-manual.html">Manual</a>
+    <a href="SQL-Query-Notebook-Installation-Manual.pdf">Manual (PDF)</a>
+  </div>
+  <div class="wrap" style="margin-top:14px;font-size:12.5px">
+    Demo SQL is illustrative and assumes a courier and logistics schema that will not
+    match yours. Every demo query is tagged <code>demo</code>.
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'sqn.site.theme';
+  try {
+    var stored = localStorage.getItem(KEY);
+    if (stored) document.documentElement.setAttribute('data-theme', stored);
+  } catch (e) {}
+
+  document.getElementById('themer').addEventListener('click', function () {
+    var cur = document.documentElement.getAttribute('data-theme');
+    if (!cur) {
+      var dark = true;
+      try { dark = !window.matchMedia('(prefers-color-scheme: light)').matches; } catch (e) {}
+      cur = dark ? 'dark' : 'light';
+    }
+    var next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
