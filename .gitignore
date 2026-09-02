@@ -1,0 +1,17 @@
+# clasp — contains your script ID, never commit it
+.clasp.json
+.clasprc.json
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# never commit anything that looks like a credential
+*.pem
+*.key
+.env
+.env.*
+credentials.json
+service-account*.json
